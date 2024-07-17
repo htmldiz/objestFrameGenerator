@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+	let frame_data = new URL(location.href).searchParams.get('__frame_data__');
+	if(frame_data !== null){
+		let data = decodeURIComponent(frame_data);
+		document.body.insertAdjacentHTML(
+			'afterend',
+			'<style>'+data+'</style>'
+		);
+	}
+	let frame_id = new URL(location.href).searchParams.get('__frame_id__');
+	if(frame_id !== null){
+		const getParamsMessage = (clientHeight) => {
+			let data = {
+				height : clientHeight + "px",
+				__frame_id__ : frame_id
+			}
+			return JSON.stringify(data);
+		}
+		const sendMessagedata = (clientHeight) => {
+			let json_data = getParamsMessage(clientHeight);
+			window.parent.postMessage(json_data, '*');
+		}
+		const resizeObserver = new ResizeObserver((entries) => {
+			sendMessagedata(entries[0].target.clientHeight);
+		})
+		document.addEventListener('DOMContentLoaded', function (event) {
+			sendMessagedata(document.body.clientHeight);
+		});
+		resizeObserver.observe(document.body);
+	}
+</script>
+</body>
+</html>
