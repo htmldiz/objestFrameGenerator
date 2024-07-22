@@ -3,38 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="http://esironal.github.io/cmtouch/lib/codemirror.css">
+    <link rel="stylesheet" href="http://esironal.github.io/cmtouch/addon/hint/show-hint.css">
+    <script src="http://esironal.github.io/cmtouch/lib/codemirror.js"></script>
+    <script src="http://esironal.github.io/cmtouch/addon/hint/show-hint.js"></script>
+    <script src="http://esironal.github.io/cmtouch/addon/hint/xml-hint.js"></script>
+    <script src="http://esironal.github.io/cmtouch/addon/hint/html-hint.js"></script>
+    <script src="http://esironal.github.io/cmtouch/mode/xml/xml.js"></script>
+    <script src="http://esironal.github.io/cmtouch/mode/javascript/javascript.js"></script>
+    <script src="http://esironal.github.io/cmtouch/mode/css/css.js"></script>
+    <script src="http://esironal.github.io/cmtouch/mode/htmlmixed/htmlmixed.js"></script>
+    <script src="http://esironal.github.io/cmtouch/addon/selection/active-line.js"></script>
+    <script src="http://esironal.github.io/cmtouch/addon/edit/matchbrackets.js"></script>
+    <link rel="stylesheet" href="http://esironal.github.io/cmtouch/theme/neonsyntax.css">
+    <style type="text/css">
+        label span{
+            padding: 9px;
+        }
+        label{
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            line-height: 1.2;
+            display: block;
+        }
+        .CodeMirror {
+            font-size: 15px;
+            width: 100%;
+            height: 100%;
+        }
+        input#frameurl,textarea{
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+            tab-size: 4;
+            -webkit-font-smoothing: antialiased;
+            border: 0 solid #e5e7eb;
+            box-sizing: border-box;
+            --tw-scroll-snap-strictness: proximity;
+            --tw-ring-offset-width: 0px;
+            --tw-ring-offset-color: #fff;
+            --tw-ring-color: rgba(63,131,248,.5);
+            --tw-ring-offset-shadow: 0 0 #0000;
+            --tw-ring-shadow: 0 0 #0000;
+            --tw-shadow-colored: 0 0 #0000;
+            font-feature-settings: inherit;
+            font-family: inherit;
+            font-variation-settings: inherit;
+            font-weight: inherit;
+            margin: 0;
+            --tw-shadow: 0 0 #0000;
+            appearance: none;
+            display: block;
+            width: 100%;
+            border-radius: .5rem;
+            border-width: 1px;
+            --tw-border-opacity: 1;
+            border-color: rgb(209, 213, 219,1);
+            --tw-bg-opacity: 1;
+            background-color: rgba(249,250,251,1);
+            padding: .625rem;
+            font-size: .875rem;
+            line-height: 1.25rem;
+            --tw-text-opacity: 1;
+            color: rgb(17 24 39/var(--tw-text-opacity));
+        }
+        input#frameurl{
+            border-bottom: none;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        input::placeholder{
+            opacity: .3;
+        }
+        input:focus{
+            outline:none !important;
+            box-shadow:none !important;
+            border-color:#2271b1 !important;
+        }
+        input:focus~small{
+            border-color:#2271b1;
+            outline:none;
+            box-shadow:none;
+        }
+        small{
+            padding: 9px;
+            font-size: 12px;
+            background: #fff;
+            border: 1px solid rgb(209, 213, 219,1);
+            display: block;
+            border-top-color: transparent;
+            border-bottom-left-radius: .5rem;
+            border-bottom-right-radius: .5rem;
+            background-color: rgba(249,250,251,1);
+        }
+    </style>
 </head>
 <body>
+
+<div class="wrap">
+    <h1>Settings Page</h1>
+    <form method="post" class="frame-controller">
+        <div>
+            <label for="frameurl">
+                <span>Frame url</span>
+                <div>
+                    <input type="text" id="frameurl" placeholder="https://example.com/">
+                    <small>Example: https://example.com </small>
+                </div>
+            </label>
+        </div>
+        <div>
+            <label for="style">
+                <span>Frame style</span>
+                <div id="code"></div>
+                <textarea id="style" id="" cols="30" rows="10"></textarea>
+            </label>
+        </div>
+        <button id="gen" type="button">Generate</button>
+    </form>
+</div>
+<script src="js/iframe-generator.min.js"></script>
 <script>
-	let frame_data = new URL(location.href).searchParams.get('__frame_data__');
-	if(frame_data !== null){
-		let data = decodeURIComponent(frame_data);
-		document.body.insertAdjacentHTML(
-			'afterend',
-			'<style>'+data+'</style>'
-		);
+	CodeMirror.commands.autocomplete = function(cm) {
+		CodeMirror.showHint(cm, CodeMirror.hint.html);
 	}
-	let frame_id = new URL(location.href).searchParams.get('__frame_id__');
-	if(frame_id !== null){
-		const getParamsMessage = (clientHeight) => {
-			let data = {
-				height : clientHeight + "px",
-				__frame_id__ : frame_id
-			}
-			return JSON.stringify(data);
-		}
-		const sendMessagedata = (clientHeight) => {
-			let json_data = getParamsMessage(clientHeight);
-			window.parent.postMessage(json_data, '*');
-		}
-		const resizeObserver = new ResizeObserver((entries) => {
-			sendMessagedata(entries[0].target.clientHeight);
-		})
-		document.addEventListener('DOMContentLoaded', function (event) {
-			sendMessagedata(document.body.clientHeight);
+	window.onload = function() {
+		var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("style"),{
+			mode: "text/css",
+			profile: 'xhtml',
+			lineWrapping: true,
+			lineNumbers: true,
+			styleActiveLine: true,
+			matchBrackets: true,
 		});
-		resizeObserver.observe(document.body);
-	}
+		document.getElementById('gen').addEventListener('click', function(){
+			console.log(myCodeMirror.getValue());
+			let url = this.closest('form').querySelector('#frameurl').value;
+			let style = this.closest('form').querySelector('#style').value;
+			if(myCodeMirror.getValue().length > 0){
+				style = myCodeMirror.getValue();
+			}
+			style = style.replace(/(\r\n|\n|\r)/gm,"");
+			this.closest('form').querySelectorAll('.frame-window').forEach(function(el){el.remove()})
+			this.closest('form').insertAdjacentHTML('beforeend', '<div class="frame-window" data-objest-frame-generator-list-item="'+url+'" data-frame-style="'+encodeURIComponent(style)+'"></div>');
+			window.objestFrameGenerator.initItem(this.closest('form').querySelectorAll('.frame-window')[0]);
+		})
+	};
 </script>
 </body>
 </html>
